@@ -234,14 +234,19 @@ def test_reduce_forward_all_dims() -> None:
     assert_close(t_summed_all[0], t_summed_all_expected[0])
 
 
-def broadcast_index(big_index: np.ndarray, big_shape: np.ndarray, shape: np.ndarray, out_index: np.ndarray) -> None:
+def broadcast_index(
+    big_index: np.ndarray,
+    big_shape: np.ndarray,
+    shape: np.ndarray,
+    out_index: np.ndarray,
+) -> None:
     # Ensure the shapes are compatible for broadcasting
     big_dims = len(big_shape)
     small_dims = len(shape)
 
     # Rule 1: Pad the smaller shape with ones on the left
     if big_dims > small_dims:
-        shape = np.pad(shape, (big_dims - small_dims, 0), 'constant', constant_values=1)
+        shape = np.pad(shape, (big_dims - small_dims, 0), "constant", constant_values=1)
 
     # Now both shapes should have the same number of dimensions
     for i in range(len(shape) - 1, -1, -1):
@@ -256,4 +261,6 @@ def broadcast_index(big_index: np.ndarray, big_shape: np.ndarray, shape: np.ndar
 
     # Fill any additional dimensions in big_shape with 0
     if len(big_shape) > len(shape):
-        out_index = np.concatenate((np.zeros(len(big_shape) - len(shape), dtype=out_index.dtype), out_index))
+        out_index = np.concatenate(
+            (np.zeros(len(big_shape) - len(shape), dtype=out_index.dtype), out_index)
+        )
