@@ -94,6 +94,14 @@ class Tensor:
 
         self.f = backend
 
+    @property
+    def size(self) -> int:
+        return self._tensor.size
+
+    @property
+    def dims(self) -> int:
+        return self._tensor.dims
+    
     def requires_grad_(self, x: bool) -> None:
         self.history = History()
 
@@ -118,6 +126,9 @@ class Tensor:
 
     def item(self) -> float:
         """Convert a 1-element tensor to a float"""
+        # print(self.size)
+        # print(f"in function item and printing self {type(self)}")
+        # print(f"shape of self is {self.shape}")
         assert self.size == 1
         x: float = self._tensor._storage[0]
         return x
@@ -285,3 +296,138 @@ class Tensor:
 
     # Functions
     # TODO: Implement for Task 2.3.
+    def __add__(self, other: TensorLike) -> Tensor:
+        other = self._ensure_tensor(other)
+        return Add.apply(self, other)
+    
+    def __sub__(self, other: TensorLike) -> Tensor:
+        other = self._ensure_tensor(other)
+        return Add.apply(self, Neg.apply(other))
+    
+    def __mul__(self, other: TensorLike) -> Tensor:
+        other = self._ensure_tensor(other)
+        return Mul.apply(self, other)
+    
+    def __lt__(self, other: TensorLike) -> Tensor:
+        other = self._ensure_tensor(other)
+        return LT.apply(self, other)
+    
+    def __eq__(self, other: TensorLike) -> Tensor:
+        other = self._ensure_tensor(other)
+        return EQ.apply(self, other)
+    
+    def __gt__(self, other: TensorLike) -> Tensor:
+        other = self._ensure_tensor(other)
+        return LT.apply(other, self)
+    
+    def __neg__(self) -> Tensor:
+        return Neg.apply(self)
+    
+    def __radd__(self, other: TensorLike) -> Tensor:
+        other = self._ensure_tensor(other)
+        return Add.apply(other, self)
+    
+    def __rmul__(self, other: TensorLike) -> Tensor:
+        other = self._ensure_tensor(other)
+        return Mul.apply(other, self)
+    
+    def all(self, dim: Optional[int] = None) -> Tensor:
+        # print(f"type of sslef in all is {type(self)}")
+        if dim is None:
+            # print(f"self when called in all func is {self.to_numpy()}")
+            # print(f"result of all op when dim is none is {self.f.mul_reduce(self.contiguous().view(int(operators.prod(self.shape))), 0).to_numpy()}")
+            return self.f.mul_reduce(self.contiguous().view(int(operators.prod(self.shape))), 0)
+        if dim is not None:
+            dim = tensor([dim])
+        # print(f" dim is {dim}")
+        return All.apply(self, dim)
+    
+    # def all(self, dim: Optional[int] = None) -> Tensor:
+    #     if dim is None:
+    #         # If no dimension is specified, reduce over all dimensions
+    #         return Tensor.make([operators.prod(self.to_numpy().flatten())], (1,), backend=self.backend)
+    #     else:
+    #         # Reduce along the specified dimension
+    #         return self.f.mul_reduce(self, dim)
+    
+    def is_close(self, other: TensorLike) -> Tensor:
+        other = self._ensure_tensor(other)
+        return IsClose.apply(self, other)
+    
+    def sigmoid(self) -> Tensor:
+        return Sigmoid.apply(self)
+    
+    def relu(self) -> Tensor:
+        return ReLU.apply(self)
+    
+    def log(self) -> Tensor:
+        return Log.apply(self)
+    
+    def exp(self) -> Tensor:
+        return Exp.apply(self)
+    
+    # def sum(self, dim: Optional[int] = None) -> Tensor:
+    #     print(f"dim is {dim}")
+    #     if isinstance(dim, int):
+    #         dim = (dim,)
+    #     dim2 = tensor(dim)
+    #     # print(f"tensor dim is {tensor(dim)}")
+    #     return Sum.apply(self, tensor(dim)) if dim is not None else Sum.apply(self)
+
+    def sum(self, dim: Optional[int] = None) -> Tensor:
+        """Sums the tensor along a dimension."""
+        if dim is None:
+            return self.view(int(operators.prod(self.shape))).sum(0)
+        if isinstance(dim, int):
+            dim = (dim, )
+        dim_tensor = tensor(dim)
+        # dim_tensor = tensor(dim)
+        # print(f"dim tensor in sum def is {dim_tensor.to_numpy()}")
+        return Sum.apply(self, dim_tensor)
+    
+    def mean(self, dim: Optional[int] = None) -> Tensor:
+
+        if dim is None:
+            total_elements = self.size
+        else:
+            total_elements = self.shape[dim]
+
+        return self.sum(dim) * (1 / total_elements)
+
+    def permute(self, *order: UserShape | int) -> Tensor:
+        """Permute the dimensions of the tensor"""
+        if len(order) == 1 and isinstance(order[0], int):
+            order = (order[0],)
+        else:
+            order = tuple(order)
+
+        order_tensor = tensor(order)
+
+        return Permute.apply(self, order_tensor)
+    
+    def view(self, *shape: int) -> Tensor:
+        if len(shape) == 1 and isinstance(shape[0], int):
+            shape = (shape[0],)
+        return View.apply(self.contiguous(), tensor(shape)) 
+        
+    def zero_grad_(self) -> None:
+        self.grad = None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

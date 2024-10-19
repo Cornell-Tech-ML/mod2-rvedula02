@@ -44,8 +44,10 @@ def index_to_position(index: Index, strides: Strides) -> int:
         Position in storage
 
     """
-    # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    position = 0
+    for i, stride in zip(index, strides):
+        position += i * stride
+    return position
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
@@ -61,30 +63,37 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
 
     """
     # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    for i in range(len(shape) - 1, -1, -1):
+        out_index[i] = ordinal % shape[i]
+        ordinal //= shape[i]
 
 
 def broadcast_index(
     big_index: Index, big_shape: Shape, shape: Shape, out_index: OutIndex
 ) -> None:
-    """Convert a `big_index` into `big_shape` to a smaller `out_index`
-    into `shape` following broadcasting rules. In this case
-    it may be larger or with more dimensions than the `shape`
-    given. Additional dimensions may need to be mapped to 0 or
-    removed.
+    # Ensure that the shapes are compatible
+    if len(big_shape) < len(shape):
+        raise ValueError("big_shape must be at least as long as shape")
 
-    Args:
-        big_index : multidimensional index of bigger tensor
-        big_shape : tensor shape of bigger tensor
-        shape : tensor shape of smaller tensor
-        out_index : multidimensional index of smaller tensor
+    # Iterate through dimensions from last to first
+    for i in range(len(shape) - 1, -1, -1):
+        if shape[i] == 1:
+            out_index[i] = 0
+        else:
+            out_index[i] = big_index[i]
 
-    Returns:
-        None
+    # Fill any additional dimensions in big_shape with 0
+    zeros_to_prepend = np.zeros(len(big_shape) - len(shape), dtype=out_index.dtype)
+    out_index = np.concatenate((zeros_to_prepend, out_index))
 
-    """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError("Need to implement for Task 2.2")
+
+def test_broadcast_index():
+    big_shape = np.array([2, 3, 4], dtype=np.int32)
+    shape = np.array([3, 1], dtype=np.int32)
+    big_index = np.array([1, 2, 3], dtype=np.int32)
+    out_index = np.zeros(len(shape), dtype=np.int32)
+    broadcast_index(big_index, big_shape, shape, out_index)
+    # print(f"Output Index: {out_index}")  # Should output: [2, 0]
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
@@ -101,8 +110,16 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
         IndexingError : if cannot broadcast
 
     """
-    # TODO: Implement for Task 2.2.
-    raise NotImplementedError("Need to implement for Task 2.2")
+    result_shape = []
+    len1, len2 = len(shape1), len(shape2)
+    for i in range(max(len1, len2)):
+        dim1 = shape1[len1 - 1 - i] if i < len1 else 1
+        dim2 = shape2[len2 - 1 - i] if i < len2 else 1
+        if dim1 == 1 or dim2 == 1 or dim1 == dim2:
+            result_shape.append(max(dim1, dim2))
+        else:
+            raise IndexingError(f"Shapes {shape1} and {shape2} cannot be broadcasted")
+    return tuple(reversed(result_shape))
 
 
 def strides_from_shape(shape: UserShape) -> UserStrides:
@@ -173,6 +190,8 @@ class TensorData:
         return shape_broadcast(shape_a, shape_b)
 
     def index(self, index: Union[int, UserIndex]) -> int:
+        # print(f"type of index is {type(index)}")
+        # print(f"user index is {index}")
         if isinstance(index, int):
             aindex: Index = array([index])
         else:  # if isinstance(index, tuple):
@@ -231,8 +250,9 @@ class TensorData:
             range(len(self.shape))
         ), f"Must give a position to each dimension. Shape: {self.shape} Order: {order}"
 
-        # TODO: Implement for Task 2.1.
-        raise NotImplementedError("Need to implement for Task 2.1")
+        new_shape = tuple(self.shape[i] for i in order)
+        new_strides = tuple(self._strides[i] for i in order)
+        return TensorData(self._storage, new_shape, new_strides)
 
     def to_string(self) -> str:
         """Convert to string"""
