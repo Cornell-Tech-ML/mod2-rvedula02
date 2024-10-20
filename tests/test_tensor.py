@@ -4,6 +4,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import DataObject, data, lists, permutations
 
+import numpy as np
 from minitorch import MathTestVariable, Tensor, grad_check, tensor
 
 from .strategies import assert_close, small_floats
@@ -194,6 +195,9 @@ def test_reduce_forward_one_dim() -> None:
 
     # here 0 means to reduce the 0th dim, 3 -> nothing
     t_summed = t.sum(0)
+    print("summed is")
+    print(t_summed.to_numpy())
+    print()
 
     # shape (2)
     t_sum_expected = tensor([[11, 16]])
@@ -206,8 +210,11 @@ def test_reduce_forward_one_dim_2() -> None:
     t = tensor([[2, 3], [4, 6], [5, 7]])
 
     # here 1 means reduce the 1st dim, 2 -> nothing
+    print(t.shape)
+    print(t)
+    print(type(t))
     t_summed_2 = t.sum(1)
-
+    print("here")
     # shape (3)
     t_sum_2_expected = tensor([[5], [10], [12]])
     assert t_summed_2.is_close(t_sum_2_expected).all().item()
@@ -225,3 +232,35 @@ def test_reduce_forward_all_dims() -> None:
     t_summed_all_expected = tensor([27])
 
     assert_close(t_summed_all[0], t_summed_all_expected[0])
+
+
+def broadcast_index(
+    big_index: np.ndarray,
+    big_shape: np.ndarray,
+    shape: np.ndarray,
+    out_index: np.ndarray,
+) -> None:
+    # Ensure the shapes are compatible for broadcasting
+    big_dims = len(big_shape)
+    small_dims = len(shape)
+
+    # Rule 1: Pad the smaller shape with ones on the left
+    if big_dims > small_dims:
+        shape = np.pad(shape, (big_dims - small_dims, 0), "constant", constant_values=1)
+
+    # Now both shapes should have the same number of dimensions
+    for i in range(len(shape) - 1, -1, -1):
+        if shape[i] == big_shape[i]:
+            out_index[i] = big_index[i]  # Directly copy the index
+        elif shape[i] == 1:
+            out_index[i] = 0  # Stretch the index
+        elif big_shape[i] == 1:
+            out_index[i] = big_index[i]  # Stretch the index
+        else:
+            raise ValueError(f"Shapes {big_shape} and {shape} are not broadcastable.")
+
+    # Fill any additional dimensions in big_shape with 0
+    if len(big_shape) > len(shape):
+        out_index = np.concatenate(
+            (np.zeros(len(big_shape) - len(shape), dtype=out_index.dtype), out_index)
+        )
