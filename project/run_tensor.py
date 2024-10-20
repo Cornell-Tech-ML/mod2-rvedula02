@@ -5,8 +5,8 @@ Be sure you have minitorch installed in your Virtual Env.
 
 import minitorch
 import random
-import time  
-import numpy as np 
+import time
+import numpy as np
 from typing import Any
 
 from minitorch.tensor_functions import (
@@ -95,15 +95,15 @@ class TensorTrain:
         y = minitorch.tensor(data.y)
 
         losses = []
-        overall_start_time = time.time() 
+        overall_start_time = time.time()
         for epoch in range(1, self.max_epochs + 1):
-            epoch_start_time = time.time() 
+            epoch_start_time = time.time()
 
             total_loss = 0.0
             correct = 0
             optim.zero_grad()
 
-           
+
             out = self.model.forward(X).view(data.N)
             prob = (out * y) + (out - 1.0) * (y - 1.0)
 
@@ -112,21 +112,21 @@ class TensorTrain:
             total_loss = loss.sum().view(1)[0]
             losses.append(total_loss)
 
-           
+
             optim.step()
 
-            epoch_end_time = time.time()  
-            epoch_duration = epoch_end_time - epoch_start_time  
+            epoch_end_time = time.time()
+            epoch_duration = epoch_end_time - epoch_start_time
 
             # Logging
             if epoch % 10 == 0 or epoch == max_epochs:
                 y2 = minitorch.tensor(data.y)
                 correct = int(((out.detach() > 0.5) == y2).sum()[0])
                 log_fn(epoch, total_loss, correct, losses)
-                print(f"Epoch {epoch} took {epoch_duration:.4f} seconds")  
+                print(f"Epoch {epoch} took {epoch_duration:.4f} seconds")
 
-        overall_end_time = time.time() 
-        total_time = overall_end_time - overall_start_time 
+        overall_end_time = time.time()
+        total_time = overall_end_time - overall_start_time
         print(f"Training completed in {total_time:.2f} seconds.")
 
 if __name__ == "__main__":
