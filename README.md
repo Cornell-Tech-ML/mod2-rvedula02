@@ -20,6 +20,12 @@ The files that will be synced are:
 
 Training Results for datasets are as follows.
 
+Plot:
+![alt text](images/Simple_Plot.png)
+
+Loss:
+![alt text](images/Simple_Loss.png)
+
 Simple Dataset:
 Epoch: 10/500, loss: 36.013970089486364, correct: 27
 Epoch 10 took 0.0367 seconds
@@ -123,7 +129,13 @@ Epoch: 500/500, loss: 34.49708792402035, correct: 27
 Epoch 500 took 0.0459 seconds
 Training completed in 24.19 seconds.
 
-Diag Model:
+Diag Dataset:
+Plot:
+![alt text](images/Diag_Plot.png)
+
+Loss:
+![alt text](images/Diag_Loss.png)
+
 Epoch: 0/500, loss: 0, correct: 0
 Epoch: 10/500, loss: 18.0731987642279, correct: 47
 Epoch 10 took 0.0387 seconds
@@ -228,6 +240,12 @@ Epoch 500 took 0.0365 seconds
 Training completed in 23.26 seconds.
 
 Split Dataset:
+Plot:
+![alt text](images/Split_Plot.png)
+
+Loss:
+![alt text](images/Solit_Loss.png)
+
 Epoch: 0/500, loss: 0, correct: 0
 Epoch: 10/500, loss: 35.78583034541313, correct: 25
 Epoch 10 took 0.0384 seconds
@@ -332,6 +350,12 @@ Epoch 500 took 0.0373 seconds
 Training completed in 23.20 seconds.
 
 XOR Dataset:
+Plot:
+![alt text](images/XOR_Plot.png)
+
+Loss:
+![alt text](images/XOR_Loss.png)
+
 Epoch: 0/500, loss: 0, correct: 0
 Epoch: 10/500, loss: 37.63186131586553, correct: 30
 Epoch 10 took 0.0366 seconds
