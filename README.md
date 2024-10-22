@@ -46,7 +46,8 @@ Total training completed in 23.20 seconds.
 
 XOR Dataset:
 
-![image](https://github.com/user-attachments/assets/911deac8-bdd6-440c-b41a-b0251ce72479)
+<img width="418" alt="image" src="https://github.com/user-attachments/assets/22745cdf-3bfa-4e90-bea7-84102f1c85b5">
+<img width="266" alt="image" src="https://github.com/user-attachments/assets/2229b6a1-f2dc-4508-98a8-11bfd05b0a82">
 
 Epochs took an average time of 0.0366 seconds
 Total training completed in 23.74 seconds.
